@@ -28,9 +28,6 @@ const generateRandomString = function() {
   }).join('');
 }
 
-console.log(generateRandomString());
-
-
 app.set('view engine', 'ejs');
 
 app.get('/', (req, res) => {
@@ -48,6 +45,10 @@ app.get('/urls/new', (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
+  let randomString = generateRandomString()
+  urlDatabase[randomString] = req.body.longURL;
+  console.log(urlDatabase[randomString])
+  console.log(urlDatabase);
   res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
