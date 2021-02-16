@@ -26,7 +26,16 @@ const generateRandomString = function() {
       return String.fromCharCode(element + 61)
     }
   }).join('');
-}
+};
+
+const randomQuote = function() {
+  const quotes = [
+    `"So short I can't believe the ticker symbol isn't GME"`,
+    `"The URLs are shortening so be sure to add flour and salt"`,
+    `"Eror 604: Must be this short to ride"`,
+    `"URLs so short they're looking up"`]
+  return quotes[Math.floor(Math.random() * quotes.length)]
+};
 
 app.set('view engine', 'ejs');
 
@@ -35,7 +44,10 @@ app.get('/', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    urls: urlDatabase,
+    'randomQuote' : randomQuote
+  };
   res.render("urls_index", templateVars);
 })
 
@@ -44,20 +56,23 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
   let randomString = generateRandomString()
   urlDatabase[randomString] = req.body.longURL;
-  console.log(urlDatabase[randomString])
-  console.log(urlDatabase);
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  res.redirect(301, `/urls/${randomString}`)
 });
 
 app.get('/urls/:shortUrl', (req, res) => {
   const templateVars = {
     'shortURL' : req.params.shortUrl,
     'longURL' : urlDatabase[req.params.shortUrl]
-  }
+  };
   res.render("urls_show", templateVars);
+});
+
+app.get('/u/:shortUrl', (req, res) => {
+  let key = req.params.shortUrl;
+  console.log(`${urlDatabase[key]}`);
+  res.redirect(`${urlDatabase[key]}`);
 });
 
 app.get('/urls.json', (req, res) => {
