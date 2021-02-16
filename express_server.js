@@ -33,7 +33,8 @@ const randomQuote = function() {
     `"So short I can't believe the ticker symbol isn't GME"`,
     `"The URLs are shortening so be sure to add flour and salt"`,
     `"Eror 604: Must be this short to ride"`,
-    `"URLs so short they're looking up"`]
+    `"URLs so short they're looking up"`,
+    `"Get Shorty"`]
   return quotes[Math.floor(Math.random() * quotes.length)]
 };
 
@@ -71,7 +72,6 @@ app.get('/urls/:shortUrl', (req, res) => {
 
 app.get('/u/:shortUrl', (req, res) => {
   let key = req.params.shortUrl;
-  console.log(`${urlDatabase[key]}`);
   res.redirect(`${urlDatabase[key]}`);
 });
 
@@ -85,5 +85,5 @@ app.get('/hello', (req, res) => {
 
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Server listening on port ${PORT}!`);
 });
