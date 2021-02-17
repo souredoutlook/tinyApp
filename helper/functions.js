@@ -25,28 +25,53 @@ const randomQuote = function() {
     `"Get Shorty"`,
     `"Here for a good time (not a long time)"`,
     `"I'll have a short one"`,
-    `"Go shorty, it's your birthday, we gon' party like it's your birthday"`
+    `"Go shorty, it's your birthday, we gon' party like it's your birthday"`,
+    `"Forecast: Shorts weather"`
   ];
   return quotes[Math.floor(Math.random() * quotes.length)];
 };
 
-const checkEmail = function(email, userDB) {
-  for (let key in userDB) {
-    if (userDB[key].email === email) {
-      return true;
+/**
+ * 
+ * @param {string} value string that contains the email or id of the user you want 
+ * @param {object} userDB object
+ */
+const getUser = function(value, userDB) {
+  return Object.values(userDB).find(user => user.id === value || user.email === value);
+};
+
+/**
+ * 
+ * @param {string} email string that contains the email of the user you are validating
+ * @param {string} password  string that contains the password of the user you are validating
+ * @param {object} userDB object containing user objects
+ */
+const validateUser = function (email, password, userDB) {
+  const user = getUser(email, userDB);
+  if (user) {
+    if (user.password === password) {
+      return { user: user, error: null }
+    } else {
+      return {user: user, error: "password"}
     }
+  } else {
+    return { user: null, error: "email" }
   }
-  return false;
 };
 
-const checkPassword = function(bodyObj, userDB) {
-  if (Object.values(userDB).find(user => user.password === bodyObj.password && user.email === bodyObj.email)) {
-    return true;
-  }
-  return false;
-};
+/**
+ * 
+ * @param {string} email string that contains the email of the user you are validating
+ * @param {string} password  string that contains the password of the user you are validating
+ * @param {object} userDB object containing user objects
+ */
+const registerUser = function(email, password, userDB) {
 
-const getID = function(email, userDB) {
-  return Object.values(userDB).find(user => user.email === email).id;
-}
-module.exports = { generateRandomString, randomQuote, checkEmail, checkPassword, getID };
+  const id = generateRandomString(email, password, userDB);
+
+  userDB[id] = { id, email, password };
+
+  return userDB[id];
+
+};
+module.exports = { generateRandomString, randomQuote, getUser, validateUser, registerUser };

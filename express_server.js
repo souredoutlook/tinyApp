@@ -8,7 +8,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.set('view engine', 'ejs');
 
-const { generateRandomString, randomQuote, checkEmail, checkPassword, getID } = require('./helper/functions');
+const { generateRandomString, randomQuote, getUser, validateUser, registerUser} = require('./helper/functions');
 
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
@@ -38,18 +38,20 @@ app.get('/', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  let id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const user = getUser(id, users);
   const templateVars = {
     'randomQuote' : randomQuote,
     urls: urlDatabase,
-    user: users[id]
+    user
   };
   res.render("urls_index", templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
-  let id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
-  const templateVars = { user : users[id] };
+  const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const user = getUser(id, users);
+  const templateVars = { user };
   res.render("urls_new", templateVars);
 });
 
@@ -78,44 +80,41 @@ app.post('/logout', (req, res) => {
 });
 
 app.get('/urls/:shortURL', (req, res) => {
-  let id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const user = getUser(id, users);
   const templateVars = {
     'shortURL' : req.params.shortURL,
     'longURL' : urlDatabase[req.params.shortURL],
-    user : users[id]
+    user
   };
   res.render("urls_show", templateVars);
 });
 
 app.get('/register', (req, res) => {
-  let id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
-  const templateVars = { user : users[id] };
+  const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const user = getUser(id, users);
+  const templateVars = { user };
   res.render('register', templateVars);
 });
 
 app.post('/register', (req, res) => {
-
-  if (req.body.email === '' || req.body.password === '' || req.body.email === undefined || req.body.password === undefined) {
+  const { password, email } = req.body;
+  if (email === '' || password === '' || email === undefined || password === undefined) {
     res.sendStatus(400) //this should only be possible by curling POST /register endpoint
-  } else if (checkEmail(req.body.email, users)) {
-    res.status(400).send('This email has already been used to register an account');
   } else {
-    let randomString = generateRandomString(urlDatabase);
-   
-    users[randomString] = {
-      id : randomString,
-      email: req.body.email,
-      password: req.body.password
-    };
-  
-    res.cookie('user_id', users[randomString].id);
-    res.redirect(301, '/urls');
+    if (getUser(email, users)) {
+      res.status(400).send('This email has already been used to register an account');
+    } else {
+      res.cookie('user_id', registerUser(email, password, users).id);
+      res.redirect(301, '/urls');
+    }
   }
 });
 
 app.get('/login', (req, res) => {
-  let id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
-  const templateVars = { user : users[id] };
+  const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const user = getUser(id, users)
+  const templateVars = { user };
   res.render('login', templateVars);
 });
 
@@ -123,13 +122,16 @@ app.post('/login', (req, res) => {
   const { password, email } = req.body;
   if (email === '' || password === '' || email === undefined || password === undefined) {
     res.sendStatus(400) //this should only be possible by curling POST /login endpoint
-  } else if (!checkEmail(email, users)) {
-    res.status(403).send('This email has already been used to register an account');
-  } else if (!checkPassword({ password, email }, users)) {
-    res.status(403).send('Incorrect password');
   } else {
-    res.cookie('user_id', getID(email, users));
-    res.redirect(301, '/urls');
+    const result = validateUser(email, password, users);
+    if (result.error === "email") {
+      res.status(403).send('There is no account registered to this email');
+    } else if (result.error === "password") {
+      res.status(403).send('Incorrect password');
+    } else {
+      res.cookie('user_id', result.user.id);
+      res.redirect(301, '/urls');
+    }
   }
 });
 
