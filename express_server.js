@@ -33,18 +33,18 @@ app.get('/', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  let name = req.cookies !== undefined ? req.cookies["username"] : undefined;
+  let id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
   const templateVars = {
     'randomQuote' : randomQuote,
     urls: urlDatabase,
-    username : name
+    user: users[id]
   };
   res.render("urls_index", templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
-  let name = req.cookies !== undefined ? req.cookies["username"] : undefined;
-  const templateVars = { username : name };
+  let id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const templateVars = { user : users[id] };
   res.render("urls_new", templateVars);
 });
 
@@ -79,19 +79,32 @@ app.post('/logout',(req, res) => {
 });
 
 app.get('/urls/:shortURL', (req, res) => {
-  let name = req.cookies !== undefined ? req.cookies["username"] : undefined;
+  let id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
   const templateVars = {
     'shortURL' : req.params.shortURL,
     'longURL' : urlDatabase[req.params.shortURL],
-    username : name
+    user : users[id]
   };
   res.render("urls_show", templateVars);
 });
 
 app.get('/register', (req, res) => {
-  let name = req.cookies !== undefined ? req.cookies["username"] : undefined;
-  const templateVars = { username : name };
+  let id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const templateVars = { user : users[id] };
   res.render("register", templateVars);
+});
+
+app.post('/register', (req, res) => {
+  let randomString = generateRandomString(urlDatabase);
+ 
+  users[randomString] = {
+    id : randomString,
+    email: req.body.email,
+    password: req.body.password
+  };
+
+  res.cookie('user_id', users[randomString].id);
+  res.redirect(301, '/urls');
 });
 
 

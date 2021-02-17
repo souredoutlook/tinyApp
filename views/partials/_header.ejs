@@ -11,9 +11,9 @@
       </div>
     </div>
     <div>
-      <form class="form-inline" method="POST" action="<%= username !== undefined ? '/logout' : '/login'; %>" >
-        <label for="username"><%= username !== undefined ? `Welcome back, ${username}!  ` : 'Username:'; %></label>
-        <% if (username === undefined) { %>
+      <form class="form-inline" method="POST" action="<%= user !== undefined ? '/logout' : '/login'; %>" >
+        <label for="username"><%= user !== undefined ? `Welcome back, ${user.email}!  ` : 'Username:'; %></label>
+        <% if (user === undefined) { %>
         <input style="width: 300px; margin: 1em;" class="form-control" type="text" name="username" placeholder="'Martin Short'">
         <button class="button btn-dark">Sign In</button>
         <% } else { %>
