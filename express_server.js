@@ -8,7 +8,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.set('view engine', 'ejs');
 
-const { generateRandomString, randomQuote } = require('./modules/helper');
+const { generateRandomString, randomQuote, checkEmail } = require('./modules/helper');
 
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
@@ -74,7 +74,7 @@ app.post('/login',(req, res) => {
 });
 
 app.post('/logout',(req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect(301, '/urls');
 });
 
@@ -95,6 +95,13 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
+
+  if (req.body.email === '' || req.body.password === '' || req.body.email === undefined || req.body.password === undefined) {
+    res.sendStatus(400) //this should only be possible by curling POST /register endpoint
+  } else if (checkEmail(req.body.email, users)) {
+    res.status(400).send('This email has already been used to register an account');
+  }
+  
   let randomString = generateRandomString(urlDatabase);
  
   users[randomString] = {

@@ -30,4 +30,13 @@ const randomQuote = function() {
   return quotes[Math.floor(Math.random() * quotes.length)];
 };
 
-module.exports = { generateRandomString, randomQuote };
+const checkEmail = function(email, userDB) {
+  for (let key in userDB) {
+    if (userDB[key].email === email) {
+      return true;
+    }
+  }
+  return false;
+};
+
+module.exports = { generateRandomString, randomQuote, checkEmail };
