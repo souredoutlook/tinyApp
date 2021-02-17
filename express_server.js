@@ -105,6 +105,12 @@ app.get('/urls/:shortURL', (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get('/register', (req, res) => {
+  let name = req.cookies !== undefined ? req.cookies["username"] : undefined
+  const templateVars = { username : name };
+  res.render("register", templateVars);
+});
+
 
 app.get('/u/:shortURL', (req, res) => {
   let key = req.params.shortURL;
