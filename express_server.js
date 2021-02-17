@@ -91,7 +91,7 @@ app.get('/urls/:shortURL', (req, res) => {
 app.get('/register', (req, res) => {
   let id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
   const templateVars = { user : users[id] };
-  res.render("register", templateVars);
+  res.render('register', templateVars);
 });
 
 app.post('/register', (req, res) => {
@@ -112,6 +112,12 @@ app.post('/register', (req, res) => {
 
   res.cookie('user_id', users[randomString].id);
   res.redirect(301, '/urls');
+});
+
+app.get('/login', (req, res) => {
+  let id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const templateVars = { user : users[id] };
+  res.render('login', templateVars);
 });
 
 

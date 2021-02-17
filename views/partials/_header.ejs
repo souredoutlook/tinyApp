@@ -11,11 +11,12 @@
       </div>
     </div>
     <div>
-      <form class="form-inline" method="POST" action="<%= user !== undefined ? '/logout' : '/login'; %>" >
-        <label for="username"><%= user !== undefined ? `Welcome back, ${user.email}!  ` : 'Username:'; %></label>
+      <form class="form-inline" method="GET" action="/register" >
+        <label for="username"><%= user !== undefined ? `Welcome back, ${user.email}!  ` : ''; %></label>
         <% if (user === undefined) { %>
-        <input style="width: 300px; margin: 1em;" class="form-control" type="text" name="username" placeholder="'Martin Short'">
-        <button class="button btn-dark">Sign In</button>
+        <button class="button btn-dark">Create account</button>
+        </form>
+        <small>Have an account? <a href="/login">Sign in</a></small>
         <% } else { %>
         <button class="button btn-dark" style="margin-left: 2px;">Log Out</button>
         <% } %>
