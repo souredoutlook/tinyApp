@@ -39,4 +39,14 @@ const checkEmail = function(email, userDB) {
   return false;
 };
 
-module.exports = { generateRandomString, randomQuote, checkEmail };
+const checkPassword = function(bodyObj, userDB) {
+  if (Object.values(userDB).find(user => user.password === bodyObj.password && user.email === bodyObj.email)) {
+    return true;
+  }
+  return false;
+};
+
+const getID = function(email, userDB) {
+  return Object.values(userDB).find(user => user.email === email).id;
+}
+module.exports = { generateRandomString, randomQuote, checkEmail, checkPassword, getID };

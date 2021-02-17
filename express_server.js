@@ -8,7 +8,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.set('view engine', 'ejs');
 
-const { generateRandomString, randomQuote, checkEmail } = require('./modules/helper');
+const { generateRandomString, randomQuote, checkEmail, checkPassword, getID } = require('./helper/functions');
 
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
@@ -25,6 +25,11 @@ const users = {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk"
+  },
+  "000000": {
+    id: "000000",
+    email: "test@example.net",
+    password: "test"
   }
 };
 
@@ -67,13 +72,7 @@ app.post('/urls/:shortURL', (req, res) => {
   res.redirect(301, `/urls/${key}`);
 });
 
-app.post('/login',(req, res) => {
-  let { username } = req.body;
-  res.cookie('username', username);
-  res.redirect(301, '/urls');
-});
-
-app.post('/logout',(req, res) => {
+app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   res.redirect(301, '/urls');
 });
@@ -100,18 +99,18 @@ app.post('/register', (req, res) => {
     res.sendStatus(400) //this should only be possible by curling POST /register endpoint
   } else if (checkEmail(req.body.email, users)) {
     res.status(400).send('This email has already been used to register an account');
-  }
+  } else {
+    let randomString = generateRandomString(urlDatabase);
+   
+    users[randomString] = {
+      id : randomString,
+      email: req.body.email,
+      password: req.body.password
+    };
   
-  let randomString = generateRandomString(urlDatabase);
- 
-  users[randomString] = {
-    id : randomString,
-    email: req.body.email,
-    password: req.body.password
-  };
-
-  res.cookie('user_id', users[randomString].id);
-  res.redirect(301, '/urls');
+    res.cookie('user_id', users[randomString].id);
+    res.redirect(301, '/urls');
+  }
 });
 
 app.get('/login', (req, res) => {
@@ -119,6 +118,21 @@ app.get('/login', (req, res) => {
   const templateVars = { user : users[id] };
   res.render('login', templateVars);
 });
+
+app.post('/login', (req, res) => {
+  const { password, email } = req.body;
+  if (email === '' || password === '' || email === undefined || password === undefined) {
+    res.sendStatus(400) //this should only be possible by curling POST /login endpoint
+  } else if (!checkEmail(email, users)) {
+    res.status(403).send('This email has already been used to register an account');
+  } else if (!checkPassword({ password, email }, users)) {
+    res.status(403).send('Incorrect password');
+  } else {
+    res.cookie('user_id', getID(email, users));
+    res.redirect(301, '/urls');
+  }
+});
+
 
 
 app.get('/u/:shortURL', (req, res) => {
