@@ -73,6 +73,12 @@ app.post('/urls/:shortURL/delete', (req, res)=>{
   res.redirect(301, '/urls')
 });
 
+app.post('/urls/:shortURL', (req, res) => {
+  let key = req.params.shortURL;
+  urlDatabase[key] = req.body.newURL;
+  res.redirect(301, `/urls/${key}`)
+});
+
 app.get('/urls/:shortURL', (req, res) => {
   const templateVars = {
     'shortURL' : req.params.shortURL,
@@ -80,6 +86,7 @@ app.get('/urls/:shortURL', (req, res) => {
   };
   res.render("urls_show", templateVars);
 });
+
 
 app.get('/u/:shortURL', (req, res) => {
   let key = req.params.shortURL;
