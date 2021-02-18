@@ -42,9 +42,13 @@ app.get('/urls', (req, res) => {
   const user = getUser(id, users);
   const templateVars = {
     'randomQuote' : randomQuote,
-    urls: urlDatabase,
+    urls: Object.entries(urlDatabase).filter(urlObj => urlObj[1].userID === id).reduce((myURLs,entryArray)=>{
+      myURLs[entryArray[0]] = entryArray[1]
+      return myURLs 
+    },{}),
     user
   };
+  console.log(templateVars)
   res.render("urls_index", templateVars);
 });
 
@@ -82,11 +86,6 @@ app.post('/urls/:shortURL', (req, res) => {
   res.redirect(301, `/urls/${shortURL}`);
 });
 
-app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
-  res.redirect(301, '/urls');
-});
-
 app.get('/urls/:shortURL', (req, res) => {
   const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
   const user = getUser(id, users);
@@ -97,6 +96,11 @@ app.get('/urls/:shortURL', (req, res) => {
     user
   };
   res.render("urls_show", templateVars);
+});
+
+app.post('/logout', (req, res) => {
+  res.clearCookie('user_id');
+  res.redirect(301, '/urls');
 });
 
 app.get('/register', (req, res) => {
