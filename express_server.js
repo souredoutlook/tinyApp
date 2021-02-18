@@ -51,8 +51,12 @@ app.get('/urls', (req, res) => {
 app.get('/urls/new', (req, res) => {
   const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
   const user = getUser(id, users);
-  const templateVars = { user };
-  res.render("urls_new", templateVars);
+  if (user) { 
+    const templateVars = { user };
+    res.render('urls_new', templateVars);
+  } else {
+    res.redirect('/login/redir')
+  }
 });
 
 
@@ -114,7 +118,14 @@ app.post('/register', (req, res) => {
 app.get('/login', (req, res) => {
   const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
   const user = getUser(id, users)
-  const templateVars = { user };
+  const templateVars = { user, redir: null };
+  res.render('login', templateVars);
+});
+
+app.get('/login/:redir', (req, res) => {
+  const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const user = getUser(id, users)
+  const templateVars = { user, redir: req.params.redir};
   res.render('login', templateVars);
 });
 
