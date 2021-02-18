@@ -8,7 +8,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.set('view engine', 'ejs');
 
-const { generateRandomString, randomQuote, getUser, validateUser, registerUser} = require('./helper/functions');
+const { generateRandomString, randomQuote, getUser, validateUser, registerUser, urlsForUser, getAlertMessage} = require('./helper/functions');
 
 const urlDatabase = { 
   'b2xVn2': { longURL: 'http://www.lighthouselabs.ca', userID: "000000" },
@@ -42,13 +42,9 @@ app.get('/urls', (req, res) => {
   const user = getUser(id, users);
   const templateVars = {
     'randomQuote' : randomQuote,
-    urls: Object.entries(urlDatabase).filter(urlObj => urlObj[1].userID === id).reduce((myURLs,entryArray)=>{
-      myURLs[entryArray[0]] = entryArray[1]
-      return myURLs 
-    },{}),
+    urls: urlsForUser(id,urlDatabase),
     user
   };
-  console.log(templateVars)
   res.render("urls_index", templateVars);
 });
 
@@ -90,10 +86,12 @@ app.get('/urls/:shortURL', (req, res) => {
   const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
   const user = getUser(id, users);
   const { shortURL } = req.params
+  const message = getAlertMessage(user === undefined ? 'redir' : urlsForUser(user, users)[shortURL] === undefined ? 'badID' : '')
   const templateVars = { 
     'longURL' : urlDatabase[shortURL].longURL,
+    alert: message,
     shortURL,
-    user
+    user,
   };
   res.render("urls_show", templateVars);
 });
@@ -134,7 +132,7 @@ app.get('/login', (req, res) => {
 app.get('/login/:redir', (req, res) => {
   const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
   const user = getUser(id, users)
-  const templateVars = { user, redir: req.params.redir};
+  const templateVars = { user, redir: getAlertMessage(req.params.redir) };
   res.render('login', templateVars);
 });
 

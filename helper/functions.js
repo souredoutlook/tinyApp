@@ -74,4 +74,21 @@ const registerUser = function(email, password, userDB) {
   return userDB[id];
 
 };
-module.exports = { generateRandomString, randomQuote, getUser, validateUser, registerUser };
+
+const urlsForUser = function(id, urlDB) {
+  return Object.entries(urlDB).filter(urlObj => urlObj[1].userID === id).reduce((myURLS,entryArray)=>{
+    myURLS[entryArray[0]] = entryArray[1]
+    return myURLS 
+  },{})
+};
+
+const getAlertMessage = function(string) {
+  const message = {
+    redir: "You need to be logged in to do that!",
+    badID: "This account does not have permission to make changes to this URL.",
+    logout: "Goodbye!"
+  }[string] || null;
+  return message;
+};
+
+module.exports = { generateRandomString, randomQuote, getUser, validateUser, registerUser, urlsForUser, getAlertMessage };
