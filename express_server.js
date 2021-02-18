@@ -10,9 +10,9 @@ app.set('view engine', 'ejs');
 
 const { generateRandomString, randomQuote, getUser, validateUser, registerUser} = require('./helper/functions');
 
-const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
+const urlDatabase = { 
+  'b2xVn2': { longURL: 'http://www.lighthouselabs.ca', userID: "000000" },
+  '9sm5xK': { longURL: 'http://www.google.com', userID: "000000" }
 };
 
 const users = {
@@ -61,8 +61,10 @@ app.get('/urls/new', (req, res) => {
 
 
 app.post('/urls', (req, res) => {
-  let randomString = generateRandomString(urlDatabase);
-  urlDatabase[randomString] = req.body.longURL;
+  const randomString = generateRandomString(urlDatabase);
+  const { longURL } = req.body;
+  const id = req.cookies["user_id"];
+  urlDatabase[randomString] = { longURL, userID: id };
   res.redirect(301, `/urls/${randomString}`);
 });
 
@@ -73,9 +75,11 @@ app.post('/urls/:shortURL/delete', (req, res)=>{
 });
 
 app.post('/urls/:shortURL', (req, res) => {
-  let key = req.params.shortURL;
-  urlDatabase[key] = req.body.newURL;
-  res.redirect(301, `/urls/${key}`);
+  const { shortURL } = req.params;
+  const { newURL } = req.body;
+  const id = req.cookies["user_id"];
+  urlDatabase[shortURL] = { longURL: newURL, userID: id };
+  res.redirect(301, `/urls/${shortURL}`);
 });
 
 app.post('/logout', (req, res) => {
@@ -86,9 +90,10 @@ app.post('/logout', (req, res) => {
 app.get('/urls/:shortURL', (req, res) => {
   const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
   const user = getUser(id, users);
-  const templateVars = {
-    'shortURL' : req.params.shortURL,
-    'longURL' : urlDatabase[req.params.shortURL],
+  const { shortURL } = req.params
+  const templateVars = { 
+    'longURL' : urlDatabase[shortURL].longURL,
+    shortURL,
     user
   };
   res.render("urls_show", templateVars);
@@ -150,7 +155,7 @@ app.post('/login', (req, res) => {
 
 app.get('/u/:shortURL', (req, res) => {
   let key = req.params.shortURL;
-  res.redirect(`${urlDatabase[key]}`);
+  res.redirect(`${urlDatabase[key].longURL}`);
 });
 
 app.get('/urls.json', (req, res) => {
