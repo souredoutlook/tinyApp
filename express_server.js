@@ -70,16 +70,25 @@ app.post('/urls', (req, res) => {
 
 app.post('/urls/:shortURL/delete', (req, res)=>{
   let key = req.params.shortURL;
-  delete urlDatabase[key];
-  res.redirect(301, '/urls');
+  const id = req.cookies["user_id"];
+  if (urlsForUser(id, users)[key] === undefined) {
+    res.sendStatus(403) //this should only be possible by curling POST /register endpoint
+  } else {
+    delete urlDatabase[key];
+    res.redirect(301, '/urls');
+  }
 });
 
 app.post('/urls/:shortURL', (req, res) => {
   const { shortURL } = req.params;
-  const { newURL } = req.body;
   const id = req.cookies["user_id"];
-  urlDatabase[shortURL] = { longURL: newURL, userID: id };
-  res.redirect(301, `/urls/${shortURL}`);
+  if (urlsForUser(id, users)[shortURL] === undefined) {
+    res.sendStatus(403) //this should only be possible by curling POST /register endpoint
+  } else {
+    const { newURL } = req.body;
+    urlDatabase[shortURL] = { longURL: newURL, userID: id };
+    res.redirect(301, `/urls/${shortURL}`);
+  }
 });
 
 app.get('/urls/:shortURL', (req, res) => {
