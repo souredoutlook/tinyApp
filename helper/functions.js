@@ -1,3 +1,6 @@
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
 const generateRandomString = function(database) {
   let randomNumberArray = [];
   do {
@@ -49,7 +52,7 @@ const getUser = function(value, userDB) {
 const validateUser = function (email, password, userDB) {
   const user = getUser(email, userDB);
   if (user) {
-    if (user.password === password) {
+    if (bcrypt.compareSync(password, user.password)) {
       return { user: user, error: null }
     } else {
       return {user: user, error: "password"}
@@ -67,9 +70,11 @@ const validateUser = function (email, password, userDB) {
  */
 const registerUser = function(email, password, userDB) {
 
-  const id = generateRandomString(email, password, userDB);
+  const id = generateRandomString(userDB);
 
-  userDB[id] = { id, email, password };
+  userDB[id] = { id, email, password: bcrypt.hashSync(password, saltRounds) };
+  
+  console.log(userDB[id])
 
   return userDB[id];
 
