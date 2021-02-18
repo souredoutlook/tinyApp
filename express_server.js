@@ -3,11 +3,16 @@ const app = express();
 const PORT = 8080; // default port 8080
 
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session')
 const bcrypt = require('bcrypt')
 const saltRounds = 10;
+
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2'],
+}))
+
 app.set('view engine', 'ejs');
 
 const { generateRandomString, randomQuote, getUser, validateUser, registerUser, urlsForUser, getAlertMessage} = require('./helper/functions');
@@ -40,7 +45,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const id = req.session !== undefined ? req.session["user_id"] : undefined;
   const user = getUser(id, users);
   const templateVars = {
     'randomQuote' : randomQuote,
@@ -51,7 +56,7 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const id = req.session !== undefined ? req.session["user_id"] : undefined;
   const user = getUser(id, users);
   if (user) { 
     const templateVars = { user };
@@ -65,15 +70,15 @@ app.get('/urls/new', (req, res) => {
 app.post('/urls', (req, res) => {
   const randomString = generateRandomString(urlDatabase);
   const { longURL } = req.body;
-  const id = req.cookies["user_id"];
+  const id = req.session["user_id"];
   urlDatabase[randomString] = { longURL, userID: id };
   res.redirect(301, `/urls/${randomString}`);
 });
 
 app.post('/urls/:shortURL/delete', (req, res)=>{
   let key = req.params.shortURL;
-  const id = req.cookies["user_id"];
-  if (urlsForUser(id, users)[key] === undefined) {
+  const id = req.session["user_id"];
+  if (urlsForUser(id, urlDatabase)[key] === undefined) {
     res.sendStatus(403) //this should only be possible by curling POST /register endpoint
   } else {
     delete urlDatabase[key];
@@ -83,8 +88,8 @@ app.post('/urls/:shortURL/delete', (req, res)=>{
 
 app.post('/urls/:shortURL', (req, res) => {
   const { shortURL } = req.params;
-  const id = req.cookies["user_id"];
-  if (urlsForUser(id, users)[shortURL] === undefined) {
+  const id = req.session["user_id"];
+  if (urlsForUser(id, urlDatabase)[shortURL] === undefined) {
     res.sendStatus(403) //this should only be possible by curling POST /register endpoint
   } else {
     const { newURL } = req.body;
@@ -94,12 +99,12 @@ app.post('/urls/:shortURL', (req, res) => {
 });
 
 app.get('/urls/:shortURL', (req, res) => {
-  const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const id = req.session !== undefined ? req.session["user_id"] : undefined;
   const user = getUser(id, users);
   const { shortURL } = req.params
-  const message = getAlertMessage(user === undefined ? 'redir' : urlsForUser(user, users)[shortURL] === undefined ? 'badID' : '')
+  const message = getAlertMessage(user === undefined ? 'redir' : urlsForUser(id, urlDatabase)[shortURL] === undefined ? 'badID' : '')
   const templateVars = { 
-    'longURL' : urlDatabase[shortURL].longURL,
+    'longURL' : urlDatabase[shortURL] !== undefined ? urlDatabase[shortURL].longURL : undefined,
     alert: message,
     shortURL,
     user,
@@ -108,12 +113,12 @@ app.get('/urls/:shortURL', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  req.session['user_id'] = null;
   res.redirect(301, '/urls');
 });
 
 app.get('/register', (req, res) => {
-  const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const id = req.session !== undefined ? req.session["user_id"] : undefined;
   const user = getUser(id, users);
   const templateVars = { user };
   res.render('register', templateVars);
@@ -127,21 +132,21 @@ app.post('/register', (req, res) => {
     if (getUser(email, users)) {
       res.status(400).send('This email has already been used to register an account');
     } else {
-      res.cookie('user_id', registerUser(email, password, users).id);
+      req.session['user_id'] = registerUser(email, password, users).id;
       res.redirect(301, '/urls');
     }
   }
 });
 
 app.get('/login', (req, res) => {
-  const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const id = req.session !== undefined ? req.session["user_id"] : undefined;
   const user = getUser(id, users)
   const templateVars = { user, redir: null };
   res.render('login', templateVars);
 });
 
 app.get('/login/:redir', (req, res) => {
-  const id = req.cookies !== undefined ? req.cookies["user_id"] : undefined;
+  const id = req.session !== undefined ? req.session["user_id"] : undefined;
   const user = getUser(id, users)
   const templateVars = { user, redir: getAlertMessage(req.params.redir) };
   res.render('login', templateVars);
@@ -158,7 +163,7 @@ app.post('/login', (req, res) => {
     } else if (result.error === "password") {
       res.status(403).send('Incorrect password');
     } else {
-      res.cookie('user_id', result.user.id);
+      req.session['user_id'] = result.user.id;
       res.redirect(301, '/urls');
     }
   }

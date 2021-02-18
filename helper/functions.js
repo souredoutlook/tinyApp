@@ -73,8 +73,6 @@ const registerUser = function(email, password, userDB) {
   const id = generateRandomString(userDB);
 
   userDB[id] = { id, email, password: bcrypt.hashSync(password, saltRounds) };
-  
-  console.log(userDB[id])
 
   return userDB[id];
 
