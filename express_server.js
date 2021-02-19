@@ -78,11 +78,16 @@ app.get('/urls/new', (req, res) => {
 
 
 app.post('/urls', (req, res) => {
-  const randomString = generateRandomString(urlDatabase);
-  const { longURL } = req.body;
-  const id = req.session["user_id"];
-  urlDatabase[randomString] = { longURL, userID: id };
-  res.redirect(301, `/urls/${randomString}`);
+  const id = req.session !== undefined ? req.session["user_id"] : undefined;
+  const user = getUser(id, users)
+  if (user === undefined) {
+    res.sendStatus(403) //this should only be possible by curling POST /register endpoint
+  } else {
+    const randomString = generateRandomString(urlDatabase);
+    const { longURL } = req.body;
+    urlDatabase[randomString] = { longURL, userID: id };
+    res.redirect(`/urls/${randomString}`);
+  }
 });
 
 app.post('/urls/:shortURL/delete', (req, res)=>{
@@ -182,8 +187,12 @@ app.post('/login', (req, res) => {
 
 
 app.get('/u/:shortURL', (req, res) => {
-  let key = req.params.shortURL;
-  res.redirect(`${urlDatabase[key].longURL}`);
+  const { shortURL } = req.params;
+  if (urlDatabase[shortURL] === undefined) {
+    res.redirect(`/urls/${shortURL}`)
+  } else {
+    res.redirect(`${urlDatabase[shortURL].longURL}`);
+  }
 });
 
 app.get('/urls.json', (req, res) => {
