@@ -76,7 +76,7 @@ app.get('/login', (req, res) => {
   if (user) {
     res.redirect('/urls')
   } else {
-    const templateVars = { user, redir: null };
+    const templateVars = { user, message: null };
     res.render('login', templateVars);
   }
 });
@@ -94,13 +94,13 @@ app.post('/login', (req, res) => {
     res.sendStatus(400) //this should only be possible by curling POST /login endpoint
   } else {
     const result = validateUser(email, password, users);
-    if (result.error === "email") {
-      res.status(403).send('There is no account registered to this email');
-    } else if (result.error === "password") {
-      res.status(403).send('Incorrect password');
+    if (result.error === 'email') {
+      res.redirect('/login/noEmail');
+    } else if (result.error === 'password') {
+      res.redirect('/login/invalidPass');
     } else {
       req.session['user_id'] = result.user.id;
-      res.redirect(301, '/urls');
+      res.redirect('/urls');
     }
   }
 });

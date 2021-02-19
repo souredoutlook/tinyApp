@@ -21,15 +21,15 @@ const generateRandomString = function(database) {
 
 const randomQuote = function() {
   const quotes = [
-    `"So short I can't believe the ticker symbol isn't GME"`,
-    `"The URLs are shortening so be sure to add flour and salt"`,
-    `"Error 604: Must be this short to ride"`,
-    `"URLs so short they're looking up"`,
-    `"Get Shorty"`,
-    `"Here for a good time (not a long time)"`,
-    `"I'll have a short one"`,
-    `"Go shorty, it's your birthday, we gon' party like it's your birthday"`,
-    `"Forecast: Shorts weather"`
+    `'So short I can't believe the ticker symbol isn't GME'`,
+    `'The URLs are shortening so be sure to add flour and salt'`,
+    `'Error 604: Must be this short to ride'`,
+    `'URLs so short they're looking up'`,
+    `'Get Shorty'`,
+    `'Here for a good time (not a long time)'`,
+    `'I'll have a short one'`,
+    `'Go shorty, it's your birthday, we gon' party like it's your birthday'`,
+    `'Forecast: Shorts weather'`
   ];
   return quotes[Math.floor(Math.random() * quotes.length)];
 };
@@ -55,10 +55,10 @@ const validateUser = function (email, password, userDB) {
     if (bcrypt.compareSync(password, user.password)) {
       return { user: user, error: null }
     } else {
-      return {user: user, error: "password"}
+      return {user: user, error: 'password'}
     }
   } else {
-    return { user: null, error: "email" }
+    return { user: null, error: 'email' }
   }
 };
 
@@ -87,10 +87,13 @@ const urlsForUser = function(id, urlDB) {
 
 const getAlertMessage = function(string) {
   const message = {
-    redir: "You need to be logged in to do that!",
-    badID: "This account does not have permission to make changes to this URL.",
-    bye: "Goodbye! Hope to see you again shortly!",
-    noExist: "This Short URL is not in use yet"
+    redir: 'You need to be logged in to do that!',
+    badID: 'This account does not have permission to make changes to this URL.',
+    bye: 'Goodbye! Hope to see you again shortly!',
+    noEmail: 'There is no account registered to this email.',
+    emailExists: 'There is already an account registered to this email.',
+    invalidPass: 'The password you have entered is incorrect.',
+    noExist: 'This Short URL is not in use yet.'
   }[string] || null;
   return message;
 };

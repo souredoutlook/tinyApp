@@ -16,7 +16,7 @@
 
     <main style="margin: 1em;">
       <% if (message !== null) { %>
-        <div class="<%= message.length > 36 ? 'alert alert-primary': 'alert alert-danger'; %>">
+        <div class="<%= message.includes('bye') ? 'alert alert-primary': 'alert alert-danger'; %>">
           <%= message %>
         </div>
       <% } %>
