@@ -15,9 +15,9 @@
     <%- include('./partials/_header') %>
 
     <main style="margin: 1em;">
-      <% if (redir !== null) { %>
-        <div class="alert alert-danger">
-          <%= redir %>
+      <% if (message !== null) { %>
+        <div class="<%= message.length > 36 ? 'alert alert-primary': 'alert alert-danger'; %>">
+          <%= message %>
         </div>
       <% } %>
       <h3>Log In:</h3>
