@@ -93,7 +93,8 @@ const getAlertMessage = function(string) {
     noEmail: 'There is no account registered to this email.',
     emailExists: 'There is already an account registered to this email.',
     invalidPass: 'The password you have entered is incorrect.',
-    noExist: 'This Short URL is not in use yet.'
+    noExist: 'This Short URL is not in use yet.',
+    blank: 'Email address and/or password fields must not be left empty.'
   }[string] || null;
   return message;
 };

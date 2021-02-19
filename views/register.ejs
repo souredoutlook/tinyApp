@@ -15,6 +15,11 @@
     <%- include('./partials/_header') %>
 
     <main style="margin: 1em;">
+      <% if (message !== null) { %>
+        <div class="alert alert-danger">
+          <%= message %>
+        </div>
+      <% } %>
       <h3>Register an account:</h3>
       <form action="/register" method="POST">
         <div class="form-group">

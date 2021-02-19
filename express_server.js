@@ -51,7 +51,24 @@ app.get('/register', (req, res) => {
   if (user) {
     res.redirect('/urls')
   } else {
-    const templateVars = { user };
+    const templateVars = { 
+      message: null,
+      user
+    };
+    res.render('register', templateVars);
+  }
+});
+
+app.get('/register/:redir', (req, res) => {
+  const id = req.session !== undefined ? req.session["user_id"] : undefined;
+  const user = getUser(id, users);
+  if (user) {
+    res.redirect('/urls')
+  } else {
+    const templateVars = { 
+      message: getAlertMessage(req.params.redir),
+      user
+    };
     res.render('register', templateVars);
   }
 });
@@ -59,10 +76,10 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   const { password, email } = req.body;
   if (email === '' || password === '' || email === undefined || password === undefined) {
-    res.sendStatus(400) //this should only be possible by curling POST /register endpoint
+    res.redirect('/register/blank')
   } else {
     if (getUser(email, users)) {
-      res.status(400).send('This email has already been used to register an account');
+      res.redirect('/register/emailExists');
     } else {
       req.session['user_id'] = registerUser(email, password, users).id;
       res.redirect(301, '/urls');
@@ -91,7 +108,7 @@ app.get('/login/:redir', (req, res) => {
 app.post('/login', (req, res) => {
   const { password, email } = req.body;
   if (email === '' || password === '' || email === undefined || password === undefined) {
-    res.sendStatus(400) //this should only be possible by curling POST /login endpoint
+    res.redirect('/login/blank') 
   } else {
     const result = validateUser(email, password, users);
     if (result.error === 'email') {
