@@ -42,8 +42,8 @@ const randomQuote = function() {
 };
 
 /**
- * 
- * @param {string} value string that contains the email or id of the user you want 
+ *
+ * @param {string} value string that contains the email or id of the user you want
  * @param {object} userDB object
  */
 const getUser = function(value, userDB) {
@@ -51,26 +51,26 @@ const getUser = function(value, userDB) {
 };
 
 /**
- * 
+ *
  * @param {string} email string that contains the email of the user you are validating
  * @param {string} password  string that contains the password of the user you are validating
  * @param {object} userDB object containing user objects
  */
-const validateUser = function (email, password, userDB) {
+const validateUser = function(email, password, userDB) {
   const user = getUser(email, userDB);
   if (user) {
     if (bcrypt.compareSync(password, user.password)) {
-      return { user: user, error: null }
+      return { user: user, error: null };
     } else {
-      return {user: user, error: 'password'}
+      return {user: user, error: 'password'};
     }
   } else {
-    return { user: null, error: 'email' }
+    return { user: null, error: 'email' };
   }
 };
 
 /**
- * 
+ *
  * @param {string} email string that contains the email of the user you are validating
  * @param {string} password  string that contains the password of the user you are validating
  * @param {object} userDB object containing user objects
@@ -87,19 +87,19 @@ const registerUser = function(email, password, userDB) {
 
 /**
  * returns urls that belong to the supplied user id
- * @param {string} id 
- * @param {object} urlDB an object containing objects 
+ * @param {string} id
+ * @param {object} urlDB an object containing objects
  */
 const urlsForUser = function(id, urlDB) {
   return Object.entries(urlDB).filter(urlObj => urlObj[1].userID === id).reduce((myURLS,entryArray)=>{
-    myURLS[entryArray[0]] = entryArray[1]
-    return myURLS 
-  },{})
+    myURLS[entryArray[0]] = entryArray[1];
+    return myURLS;
+  },{});
 };
 
 /**
  * returns a string if the param string matches key in message object otherwise returns null
- * @param {string} string 
+ * @param {string} string
  */
 const getAlertMessage = function(param) {
   const message = {
@@ -113,6 +113,6 @@ const getAlertMessage = function(param) {
     blank: 'Email address and/or password fields must not be left empty.'
   }[param] || null;
   return message;
-};  
+};
 
 module.exports = { generateRandomString, randomQuote, getUser, validateUser, registerUser, urlsForUser, getAlertMessage };
