@@ -42,7 +42,6 @@ const users = {
 
 app.get('/', (req, res) => {
   const id = req.session !== undefined ? req.session["user_id"] : undefined;
-  const user = getUser(id, users)
   if (id === undefined) {
     res.redirect('/login/redir')
   } else {
@@ -52,10 +51,10 @@ app.get('/', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const id = req.session !== undefined ? req.session["user_id"] : undefined;
-  const user = getUser(id, users);
-  if (user === undefined) {
+  if (id === undefined) {
     res.redirect('/login/redir')
   } else {
+    const user = getUser(id, users);
     const templateVars = {
       'randomQuote' : randomQuote,
       urls: urlsForUser(id,urlDatabase),
@@ -79,10 +78,10 @@ app.get('/urls/new', (req, res) => {
 
 app.post('/urls', (req, res) => {
   const id = req.session !== undefined ? req.session["user_id"] : undefined;
-  const user = getUser(id, users)
-  if (user === undefined) {
-    res.sendStatus(403) //this should only be possible by curling POST /register endpoint
+  if (id === undefined) {
+    res.redirect('/login/redir')
   } else {
+    const user = getUser(id, users)
     const randomString = generateRandomString(urlDatabase);
     const { longURL } = req.body;
     urlDatabase[randomString] = { longURL, userID: id };
@@ -93,10 +92,10 @@ app.post('/urls', (req, res) => {
 app.post('/urls/:shortURL/delete', (req, res)=>{
   const { shortURL }= req.params;
   const id = req.session !== undefined ? req.session["user_id"] : undefined;
-  if (getUser(id) === undefined) {
+  if (id === undefined) {
     res.redirect('/login/redir')
   } else if (urlsForUser(id, urlDatabase)[shortURL] === undefined) {
-    res.sendStatus(403)
+    res.redirect(`/urls/${shortURL}`)
   } else {
     delete urlDatabase[shortURL];
     res.redirect('/urls');
@@ -106,10 +105,10 @@ app.post('/urls/:shortURL/delete', (req, res)=>{
 app.post('/urls/:shortURL', (req, res) => {
   const { shortURL } = req.params;
   const id = req.session !== undefined ? req.session["user_id"] : undefined;
-  if (getUser(id) === undefined) {
+  if (id === undefined) {
     res.redirect('/login/redir')
   } else if (urlsForUser(id, urlDatabase)[shortURL] === undefined) {
-    res.sendStatus(403)
+    res.redirect(`/urls/${shortURL}`)
   } else {
     const { newURL } = req.body;
     urlDatabase[shortURL] = { longURL: newURL, userID: id };
@@ -139,8 +138,12 @@ app.post('/logout', (req, res) => {
 app.get('/register', (req, res) => {
   const id = req.session !== undefined ? req.session["user_id"] : undefined;
   const user = getUser(id, users);
-  const templateVars = { user };
-  res.render('register', templateVars);
+  if (user) {
+    res.redirect('/urls')
+  } else {
+    const templateVars = { user };
+    res.render('register', templateVars);
+  }
 });
 
 app.post('/register', (req, res) => {
