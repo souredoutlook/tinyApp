@@ -112,7 +112,7 @@ app.get('/urls/:shortURL', (req, res) => {
   const id = req.session !== undefined ? req.session["user_id"] : undefined;
   const user = getUser(id, users);
   const { shortURL } = req.params
-  const message = getAlertMessage(user === undefined ? 'redir' : urlsForUser(id, urlDatabase)[shortURL] === undefined ? 'badID' : '')
+  const message = getAlertMessage(user === undefined ? 'redir' :  urlDatabase[shortURL] === undefined ? 'noExist' : urlsForUser(id, urlDatabase)[shortURL] === undefined ? 'badID' : '')
   const templateVars = { 
     'longURL' : urlDatabase[shortURL] !== undefined ? urlDatabase[shortURL].longURL : undefined,
     alert: message,

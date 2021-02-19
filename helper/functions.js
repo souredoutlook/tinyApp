@@ -89,7 +89,8 @@ const getAlertMessage = function(string) {
   const message = {
     redir: "You need to be logged in to do that!",
     badID: "This account does not have permission to make changes to this URL.",
-    logout: "Goodbye!"
+    logout: "Goodbye!",
+    noExist: "This Short URL is not in use yet"
   }[string] || null;
   return message;
 };
