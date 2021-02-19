@@ -12,9 +12,9 @@
     </div>
     <div>
       <% if (user === undefined) { %>
-        <form class="form-inline" method="GET" action="/register" >
-          <button type="submit" class="button btn-dark">Create account</button>
-        </form>
+        <div display="form-inline">
+          <a href="/register"><button type="submit" class="button btn-dark" display>Create account</button></a>
+        </div>
         <small>Have an account? <a href="/login">Sign in</a></small>
         <% } else { %>
         <form class="form-inline" method="POST" action="/logout">

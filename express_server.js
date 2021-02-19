@@ -41,18 +41,28 @@ const users = {
 };
 
 app.get('/', (req, res) => {
-  res.redirect(301,'/urls');
+  const id = req.session !== undefined ? req.session["user_id"] : undefined;
+  const user = getUser(id, users)
+  if (id === undefined) {
+    res.redirect('/login/redir')
+  } else {
+    res.redirect('/urls');
+  }
 });
 
 app.get('/urls', (req, res) => {
   const id = req.session !== undefined ? req.session["user_id"] : undefined;
   const user = getUser(id, users);
-  const templateVars = {
-    'randomQuote' : randomQuote,
-    urls: urlsForUser(id,urlDatabase),
-    user
-  };
-  res.render("urls_index", templateVars);
+  if (user === undefined) {
+    res.redirect('/login/redir')
+  } else {
+    const templateVars = {
+      'randomQuote' : randomQuote,
+      urls: urlsForUser(id,urlDatabase),
+      user
+    };
+    res.render("urls_index", templateVars);
+  }
 });
 
 app.get('/urls/new', (req, res) => {
@@ -94,7 +104,7 @@ app.post('/urls/:shortURL', (req, res) => {
   } else {
     const { newURL } = req.body;
     urlDatabase[shortURL] = { longURL: newURL, userID: id };
-    res.redirect(301, `/urls/${shortURL}`);
+    res.redirect(`/urls/${shortURL}`);
   }
 });
 
