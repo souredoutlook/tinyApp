@@ -1,6 +1,10 @@
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
+/**
+ * returns a random string of 6 base 62 characters that is not already in the database
+ * @param {object} database
+ */
 const generateRandomString = function(database) {
   let randomNumberArray = [];
   do {
@@ -19,6 +23,9 @@ const generateRandomString = function(database) {
   }).join('');
 };
 
+/**
+ * returns a random quote for the link
+ */
 const randomQuote = function() {
   const quotes = [
     `'So short I can't believe the ticker symbol isn't GME'`,
@@ -29,7 +36,7 @@ const randomQuote = function() {
     `'Here for a good time (not a long time)'`,
     `'I'll have a short one'`,
     `'Go shorty, it's your birthday, we gon' party like it's your birthday'`,
-    `'Forecast: Shorts weather'`
+    `'Forecast: Shorts weather'`,
   ];
   return quotes[Math.floor(Math.random() * quotes.length)];
 };
@@ -78,6 +85,11 @@ const registerUser = function(email, password, userDB) {
 
 };
 
+/**
+ * returns urls that belong to the supplied user id
+ * @param {string} id 
+ * @param {object} urlDB an object containing objects 
+ */
 const urlsForUser = function(id, urlDB) {
   return Object.entries(urlDB).filter(urlObj => urlObj[1].userID === id).reduce((myURLS,entryArray)=>{
     myURLS[entryArray[0]] = entryArray[1]
@@ -85,7 +97,11 @@ const urlsForUser = function(id, urlDB) {
   },{})
 };
 
-const getAlertMessage = function(string) {
+/**
+ * returns a string if the param string matches key in message object otherwise returns null
+ * @param {string} string 
+ */
+const getAlertMessage = function(param) {
   const message = {
     redir: 'You need to be logged in to do that!',
     badID: 'This account does not have permission to make changes to this URL.',
@@ -95,8 +111,8 @@ const getAlertMessage = function(string) {
     invalidPass: 'The password you have entered is incorrect.',
     noExist: 'This Short URL is not in use yet.',
     blank: 'Email address and/or password fields must not be left empty.'
-  }[string] || null;
+  }[param] || null;
   return message;
-};
+};  
 
 module.exports = { generateRandomString, randomQuote, getUser, validateUser, registerUser, urlsForUser, getAlertMessage };
